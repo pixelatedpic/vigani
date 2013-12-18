@@ -7,7 +7,10 @@ Autonomus boat for surveying
 ###Calculation distance between two waypoints
 Link for reference : 
 http://www.movable-type.co.uk/scripts/latlong.html
+
+
 http://tronixstuff.com/2011/03/16/tutorial-your-arduinos-inbuilt-eeprom/
+http://aprs.gids.nl/nmea/
 
 Spherical Law of Cosines
 
