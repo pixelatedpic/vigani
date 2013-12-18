@@ -8,7 +8,7 @@ SoftwareSerial ss(2, 3); // RX, TX
 
 File waypoints;
 char c=0;
-char buffer[100];
+char buffer[22];
 int q=1;
 char byteRead;
 int t;
@@ -33,8 +33,6 @@ String locate_wp(int needed_wp){
   int curr_line=0;
   
   if (SD.exists("test.txt")) { //checking if the file exists
-
-   // Serial.println("file available to read");//debug
     waypoints = SD.open("test.txt",FILE_READ);
     
     while(waypoints.available()) {
@@ -45,13 +43,13 @@ String locate_wp(int needed_wp){
      }
      
      if (curr_line == needed_wp) {
-         lat_lon += c;
-         lat_lon.trim();
-         
-         if(c==';') {
-           waypoints.close();
-           return lat_lon;
-         }
+       lat_lon += c;
+       lat_lon.trim();
+       
+       if(c==';') {
+         waypoints.close();
+         return lat_lon;
+       }
       }
     }
     waypoints.close();
@@ -84,46 +82,74 @@ int total_wps(){
 
 /*
 Function descr here...
-############################
+Uses TinyGPS++ lib.
 */
 bool feedGPS() {
-//  Serial.println("Blkah bah inside feedGPS now");
   while (ss.available()) {
     if (gps.encode(ss.read())) {
-//      Serial.println("Blkah bah ss.read success");
       return true;    
     }
   }
-//  Serial.println("Blkah bah ss.available fail");
   return false;
 }
 
 /*
-Returns current GPS lat,lon in an array.
+Function descr here...
+timestamp, lat, lon, z
 Uses TinyGPS++ lib.
-#########NEED TO TEST FUNCTION!!!!##############
 */
 void getcurGPS() {
-//  Serial.println("Blkah bah inside getcurGPS");
+
+  feedGPS();
+  if (gps.date.isUpdated()) {
+    Serial.println();
+    Serial.print(gps.date.value()); 
+  }
   
   feedGPS();
+  if (gps.time.isUpdated()) {
+    Serial.print("_");
+    Serial.print(gps.time.value()); 
+  }
   
+  Serial.print(",");
+  Serial.print(gps.satellites.value());
+  Serial.print(",");
+  Serial.print(gps.hdop.value());
+  
+  feedGPS();
   if (gps.location.isUpdated()) {
+    Serial.print(",");
     Serial.print(gps.location.lat(),6);
     Serial.print(",");
-    Serial.println(gps.location.lng(),6); 
-    write_points(gps.location.lat(),gps.location.lng());
-    }
-    //lat_lon_GPS[0]=gps.location.lat(); // Latitude in degrees (double)
-    //lat_lon_GPS[1]=gps.location.lng(); // Longitude in degrees (double)
+    Serial.print(gps.location.lng(),6); 
+  }
+
+  feedGPS();
+  if (gps.altitude.isUpdated()) {
+    Serial.print(",");
+    Serial.print(gps.altitude.meters(),3); 
+  }
+    
+  write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),gps.hdop.value(),gps.location.lat(),gps.location.lng(),gps.altitude.meters());
 }
 
-void write_points(double write_lat, double write_lon) {
+void write_points(double write_date, double write_time, int write_sats, double write_hdop, double write_lat, double write_lon, double write_alt) {
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
+    log_file.print(write_date);
+    log_file.print('_');
+    log_file.print(write_time);
+    log_file.print(',');
+    log_file.print(write_sats);
+    log_file.print(',');
+    log_file.print(write_hdop);
+    log_file.print(',');
     log_file.print(write_lat,6);
     log_file.print(',');
-    log_file.println(write_lon,6);
+    log_file.print(write_lon,6);
+    log_file.print(',');
+    log_file.println(write_alt,6);
     log_file.close();
   }
 }
@@ -142,17 +168,16 @@ void setup() {
   
   SD.begin(10);
   
-  // commented since write doesnt work!!!!!!!!!!!!!!!!!!
-//  Serial.println("Calculating total WPs ...");
-//  tot_wps_infile = total_wps();
-//  Serial.print("Total WPS in file = ");
-//  Serial.println(tot_wps_infile);
-//  Serial.println();
+  Serial.println("Calculating total WPs ...");
+  tot_wps_infile = total_wps();
+  Serial.print("Total WPS in file = ");
+  Serial.println(tot_wps_infile);
+  Serial.println();
   
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
-    log_file.println(" , "); //Just a leading blank line, incase there was previous data
-    String header = "lat,lon";
+    log_file.println("##################"); 
+    String header = "date_time(UTC), sats-in-use, lat, lon, alt(z)";
     log_file.println(header);
     log_file.close();
   } else {
@@ -161,6 +186,20 @@ void setup() {
 }
 
 void loop() {
+  
+  if (blah==1) {
+    int getwp;
+    tot_wps_infile--;
+    for (getwp=0; getwp<=tot_wps_infile; getwp++) {
+      String returned_wp;
+      returned_wp = locate_wp(getwp);
+      delay (250);
+      Serial.print("Returned lat_lon=");
+      Serial.println(returned_wp);
+    }
+    blah++;
+  }
+  
   /*
   while (ss.available() > 0) {
     gps.encode(ss.read());
@@ -174,7 +213,7 @@ void loop() {
   bool newdata = false;
   unsigned long start = millis();
   
-  while (millis() - start < 250) {
+  while (millis() - start < 500) {
     if (feedGPS()) {
       newdata = true;
     }
@@ -184,7 +223,6 @@ void loop() {
     getcurGPS();
   }
   
-  
  /* if (blah2<=100) {
     getcurGPS();
     blah2++;
@@ -192,22 +230,5 @@ void loop() {
     delay(500);
   }
 */
-
-/*
-  if (blah==1) 
-  {
-    int getwp;
-    tot_wps_infile--;
-    for (getwp=0; getwp<=tot_wps_infile; getwp++) 
-    {
-       String returned_wp;
-       returned_wp = locate_wp(getwp);
-       delay (100);
-       Serial.print("Returned lat_lon=");
-       Serial.println(returned_wp);
-    }
-      blah++;
-  }  
-  */
+  
 }
-
