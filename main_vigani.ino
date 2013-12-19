@@ -1,6 +1,10 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
+//#include <sd-reader_config.h>
+//#include <sd_raw.h>
+//#include <sd_raw_config.h>
+
 #include <SD.h>
 
 TinyGPSPlus gps;
@@ -8,20 +12,23 @@ SoftwareSerial ss(2, 3); // RX, TX
 
 File waypoints;
 char c=0;
-char buffer[22];
-int q=1;
+//char buffer[22];
+//int q=1;
 char byteRead;
-int t;
+//int t;
 boolean hom = false;
-int rr = 2;
-int ff=0;
-int inc;
-String er;
+//int rr = 2;
+//int ff=0;
+//int inc;
+//String er;
 int tot_wps_infile;
 int blah=1;
 int blah2=1;
-String logfilename="20131217-01.csv";
-
+//String logfilename="20131217-01.csv";
+TinyGPSCustom ellipsoidalHeight(gps, "GPGGA", 11);
+TinyGPSCustom h_dop(gps, "GPGGA", 8);
+TinyGPSCustom northing(gps, "GPGGA", 3);
+TinyGPSCustom easting(gps, "GPGGA", 5);
 
 /*
 Function accepts int arg, which is the required waypoint (line)
@@ -47,11 +54,13 @@ String locate_wp(int needed_wp){
        lat_lon.trim();
        
        if(c==';') {
+         waypoints.flush();
          waypoints.close();
          return lat_lon;
        }
       }
     }
+    waypoints.flush();
     waypoints.close();
     
     if (!waypoints.available()) {
@@ -115,26 +124,28 @@ void getcurGPS() {
   Serial.print(",");
   Serial.print(gps.satellites.value());
   Serial.print(",");
-  Serial.print(gps.hdop.value());
+  Serial.print(h_dop.value());
   
   feedGPS();
   if (gps.location.isUpdated()) {
     Serial.print(",");
     Serial.print(gps.location.lat(),6);
     Serial.print(",");
-    Serial.print(gps.location.lng(),6); 
-  }
-
-  feedGPS();
-  if (gps.altitude.isUpdated()) {
+    Serial.print(northing.value());    
     Serial.print(",");
-    Serial.print(gps.altitude.meters(),3); 
-  }
+    Serial.print(gps.location.lng(),6);
+    Serial.print(",");
+    Serial.print(easting.value());
+  } 
+  
+  feedGPS();
+  Serial.print(",");
+  Serial.print(ellipsoidalHeight.value());
     
-  write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),gps.hdop.value(),gps.location.lat(),gps.location.lng(),gps.altitude.meters());
+  write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),h_dop.value(),gps.location.lat(),northing.value(),gps.location.lng(),easting.value(),ellipsoidalHeight.value());
 }
 
-void write_points(double write_date, double write_time, int write_sats, double write_hdop, double write_lat, double write_lon, double write_alt) {
+void write_points(double write_date, double write_time, int write_sats, const char *write_hdop, double write_lat, const char *write_northing, double write_lon, const char *write_easting, const char *write_elipsheight) {
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
     log_file.print(write_date);
@@ -147,9 +158,13 @@ void write_points(double write_date, double write_time, int write_sats, double w
     log_file.print(',');
     log_file.print(write_lat,6);
     log_file.print(',');
+    log_file.print(write_northing);
+    log_file.print(',');
     log_file.print(write_lon,6);
     log_file.print(',');
-    log_file.println(write_alt,6);
+    log_file.print(write_easting);
+    log_file.print(',');
+    log_file.println(write_elipsheight);
     log_file.close();
   }
 }
@@ -167,22 +182,25 @@ void setup() {
   ss.begin(9600);
   
   SD.begin(10);
-  
+
   Serial.println("Calculating total WPs ...");
   tot_wps_infile = total_wps();
   Serial.print("Total WPS in file = ");
   Serial.println(tot_wps_infile);
   Serial.println();
   
+  delay(2000);
+
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
-    log_file.println("##################"); 
-    String header = "date_time(UTC), sats-in-use, lat, lon, alt(z)";
+    log_file.println("#########################################"); 
+    String header = "date_time(UTC), sats-in-use, hdop, lat, northing, lon, easting, ellipsiodal-height";
     log_file.println(header);
+    log_file.flush();
     log_file.close();
   } else {
     Serial.println("Couldn't open log (aquired GPS) file");
-  }
+  } 
 }
 
 void loop() {
@@ -193,7 +211,7 @@ void loop() {
     for (getwp=0; getwp<=tot_wps_infile; getwp++) {
       String returned_wp;
       returned_wp = locate_wp(getwp);
-      delay (250);
+      //delay (250);
       Serial.print("Returned lat_lon=");
       Serial.println(returned_wp);
     }
@@ -213,7 +231,7 @@ void loop() {
   bool newdata = false;
   unsigned long start = millis();
   
-  while (millis() - start < 500) {
+  while (millis() - start < 1000) {
     if (feedGPS()) {
       newdata = true;
     }
@@ -232,3 +250,4 @@ void loop() {
 */
   
 }
+
