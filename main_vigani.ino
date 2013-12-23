@@ -36,7 +36,7 @@ to be returned (String type).
 Also if no more wps, returns string "NMWPS".
 */
 String locate_wp(int needed_wp){
-  String lat_lon="";
+  String lat_lon=F("");
   int curr_line=0;
   
   if (SD.exists("test.txt")) { //checking if the file exists
@@ -64,12 +64,12 @@ String locate_wp(int needed_wp){
     waypoints.close();
     
     if (!waypoints.available()) {
-      lat_lon="NMWPS";
+      lat_lon=F("NMWPS");
       return lat_lon;
     }
 
   } else {
-      Serial.println("Could not open the file");
+      Serial.println(F("Could not open the file"));
   } 
 }
 
@@ -83,7 +83,7 @@ int total_wps(){
   for (total_wps=0; total_wps<=1000; total_wps++) {
     String check_wp;
     check_wp = locate_wp(total_wps);
-    if (check_wp == "NMWPS") {
+    if (check_wp == F("NMWPS")) {
       return total_wps;
     }
   }
@@ -109,9 +109,9 @@ Uses TinyGPS++ lib.
 */
 void getcurGPS() {
   
-  feedGPS();
-  if (fix.value()!="0")
-  {
+//  feedGPS();
+//  if (fix.value()!=0)
+//  {
     feedGPS();
     if (gps.date.isUpdated()) {
       Serial.println();
@@ -146,7 +146,7 @@ void getcurGPS() {
     Serial.print(ellipsoidalHeight.value());
       
     write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),h_dop.value(),gps.location.lat(),northing.value(),gps.location.lng(),easting.value(),ellipsoidalHeight.value());
-  }
+  //}
 }
 
 void write_points(double write_date, double write_time, int write_sats, const char *write_hdop, double write_lat, const char *write_northing, double write_lon, const char *write_easting, const char *write_elipsheight) {
@@ -253,4 +253,3 @@ void loop() {
 */
   
 }
-
