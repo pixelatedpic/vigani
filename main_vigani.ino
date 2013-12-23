@@ -144,11 +144,47 @@ void getcurGPS() {
     feedGPS();
     Serial.print(F(","));
     Serial.print(ellipsoidalHeight.value());
-      
+    
+    //test courseto here...
+    calc_course();
+    calc_distKm();
+    
+    // TODO
+    // Variables needs to be assigned to above, and those variables needs to be fed to write_points here.
     write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),h_dop.value(),gps.location.lat(),northing.value(),gps.location.lng(),easting.value(),ellipsoidalHeight.value());
   //}
 }
 
+void calc_course() {
+    const double DEST_LAT = 4.2029716;
+    const double DEST_LON = 73.231562;
+    double coursetodest =
+      gps.courseTo(
+        gps.location.lat(),
+        gps.location.lng(),
+        DEST_LAT,
+        DEST_LON);
+    Serial.println();
+    Serial.print(coursetodest);
+    Serial.print(gps.cardinal(coursetodest));    
+}
+
+void calc_distKm() {
+    const double DEST_LAT = 4.2029716;
+    const double DEST_LON = 73.231562;
+    double disttodest =
+      gps.distanceBetween(
+        gps.location.lat(),
+        gps.location.lng(),
+        DEST_LAT,
+        DEST_LON) / 1000.0;
+    Serial.println();
+    Serial.print(disttodest);
+}
+
+/*
+Function descr here...
+*/
 void write_points(double write_date, double write_time, int write_sats, const char *write_hdop, double write_lat, const char *write_northing, double write_lon, const char *write_easting, const char *write_elipsheight) {
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
@@ -173,6 +209,9 @@ void write_points(double write_date, double write_time, int write_sats, const ch
   }
 }
 
+/*
+Function descr here...
+*/
 float getBearing(String dest_wp){
   // get current latlon from getcurGPS func
   // Calculate Bearing/Course 
@@ -208,18 +247,18 @@ void setup() {
 
 void loop() {
   
-  if (blah==1) {
-    int getwp;
-    tot_wps_infile--;
-    for (getwp=0; getwp<=tot_wps_infile; getwp++) {
-      String returned_wp;
-      returned_wp = locate_wp(getwp);
-      //delay (250);
-      Serial.print(F("Returned lat_lon="));
-      Serial.println(returned_wp);
-    }
-    blah++;
-  }
+//  if (blah==1) {
+//    int getwp;
+//    tot_wps_infile--;
+//    for (getwp=0; getwp<=tot_wps_infile; getwp++) {
+//      String returned_wp;
+//      returned_wp = locate_wp(getwp);
+//      delay (100);
+//      Serial.print(F("Returned lat_lon="));
+//      Serial.println(returned_wp);
+//    }
+//    blah++;
+//  }
   
   /*
   while (ss.available() > 0) {
