@@ -3,8 +3,6 @@ vigani
 
 Autonomus boat for surveying
 
-
-###Calculation distance between two waypoints
 Link for reference : 
 http://www.movable-type.co.uk/scripts/latlong.html
 
@@ -17,6 +15,12 @@ http://learn.adafruit.com/memories-of-an-arduino/optimizing-sram
 
 http://thijs.elenbaas.net/2012/07/extended-eeprom-library-for-arduino/
 
+http://arduiniana.org/libraries/tinygpsplus/
+
+
+
+
+###Calculation distance between two waypoints
 Spherical Law of Cosines
 
 In fact, when Sinnott published the haversine formula, computational precision was limited. Nowadays, JavaScript (and most modern computers & languages) use IEEE 754 64-bit floating-point numbers, which provide 15 significant figures of precision. With this precision, the simple spherical law of cosines formula (cos c = cos a cos b + sin a sin b cos C) gives well-conditioned results down to distances as small as around 1 metre. (Note that the geodetic form of the law of cosines is rearranged from the canonical one so that the latitude can be used directly, rather than the colatitude).
