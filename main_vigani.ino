@@ -16,7 +16,7 @@ char c=0;
 //int q=1;
 char byteRead;
 //int t;
-boolean hom = false;
+//boolean hom = false;
 //int rr = 2;
 //int ff=0;
 //int inc;
@@ -29,7 +29,7 @@ TinyGPSCustom ellipsoidalHeight(gps, "GPGGA", 11);
 TinyGPSCustom h_dop(gps, "GPGGA", 8);
 TinyGPSCustom northing(gps, "GPGGA", 3);
 TinyGPSCustom easting(gps, "GPGGA", 5);
-
+TinyGPSCustom fix(gps, "GPGGA", 6);
 /*
 Function accepts int arg, which is the required waypoint (line)
 to be returned (String type).
@@ -108,41 +108,45 @@ timestamp, lat, lon, z
 Uses TinyGPS++ lib.
 */
 void getcurGPS() {
-
-  feedGPS();
-  if (gps.date.isUpdated()) {
-    Serial.println();
-    Serial.print(gps.date.value()); 
-  }
   
   feedGPS();
-  if (gps.time.isUpdated()) {
-    Serial.print("_");
-    Serial.print(gps.time.value()); 
-  }
-  
-  Serial.print(",");
-  Serial.print(gps.satellites.value());
-  Serial.print(",");
-  Serial.print(h_dop.value());
-  
-  feedGPS();
-  if (gps.location.isUpdated()) {
-    Serial.print(",");
-    Serial.print(gps.location.lat(),6);
-    Serial.print(",");
-    Serial.print(northing.value());    
-    Serial.print(",");
-    Serial.print(gps.location.lng(),6);
-    Serial.print(",");
-    Serial.print(easting.value());
-  } 
-  
-  feedGPS();
-  Serial.print(",");
-  Serial.print(ellipsoidalHeight.value());
+  if (fix.value()!="0")
+  {
+    feedGPS();
+    if (gps.date.isUpdated()) {
+      Serial.println();
+      Serial.print(gps.date.value()); 
+    }
     
-  write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),h_dop.value(),gps.location.lat(),northing.value(),gps.location.lng(),easting.value(),ellipsoidalHeight.value());
+    feedGPS();
+    if (gps.time.isUpdated()) {
+      Serial.print(F("_"));
+      Serial.print(gps.time.value()); 
+    }
+    
+    Serial.print(F(","));
+    Serial.print(gps.satellites.value());
+    Serial.print(F(","));
+    Serial.print(h_dop.value());
+    
+    feedGPS();
+    if (gps.location.isUpdated()) {
+      Serial.print(F(","));
+      Serial.print(gps.location.lat(),6);
+      Serial.print(F(","));
+      Serial.print(northing.value());    
+      Serial.print(F(","));
+      Serial.print(gps.location.lng(),6);
+      Serial.print(F(","));
+      Serial.print(easting.value());
+    } 
+    
+    feedGPS();
+    Serial.print(F(","));
+    Serial.print(ellipsoidalHeight.value());
+      
+    write_points(gps.date.value(),gps.time.value(),gps.satellites.value(),h_dop.value(),gps.location.lat(),northing.value(),gps.location.lng(),easting.value(),ellipsoidalHeight.value());
+  }
 }
 
 void write_points(double write_date, double write_time, int write_sats, const char *write_hdop, double write_lat, const char *write_northing, double write_lon, const char *write_easting, const char *write_elipsheight) {
@@ -177,15 +181,14 @@ float getBearing(String dest_wp){
 
 void setup() {
   // put your setup code here, to run once:
-  hom =true;
+  //hom =true;
   Serial.begin(9600);
   ss.begin(9600);
-  
   SD.begin(10);
 
-  Serial.println("Calculating total WPs ...");
+  Serial.println(F("Calculating total WPs ..."));
   tot_wps_infile = total_wps();
-  Serial.print("Total WPS in file = ");
+  Serial.print(F("Total WPS in file = "));
   Serial.println(tot_wps_infile);
   Serial.println();
   
@@ -193,13 +196,13 @@ void setup() {
 
   File log_file = SD.open("abc.csv", FILE_WRITE);
   if (log_file) {
-    log_file.println("#########################################"); 
-    String header = "date_time(UTC), sats-in-use, hdop, lat, northing, lon, easting, ellipsiodal-height";
+    log_file.println(F("#########################################")); 
+    String header = F("date_time(UTC), sats-in-use, hdop, lat, northing, lon, easting, ellipsiodal-height");
     log_file.println(header);
     log_file.flush();
     log_file.close();
   } else {
-    Serial.println("Couldn't open log (aquired GPS) file");
+    Serial.println(F("Couldn't open log (aquired GPS) file"));
   } 
 }
 
@@ -212,7 +215,7 @@ void loop() {
       String returned_wp;
       returned_wp = locate_wp(getwp);
       //delay (250);
-      Serial.print("Returned lat_lon=");
+      Serial.print(F("Returned lat_lon="));
       Serial.println(returned_wp);
     }
     blah++;
