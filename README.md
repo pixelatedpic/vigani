@@ -10,8 +10,12 @@ http://www.movable-type.co.uk/scripts/latlong.html
 
 
 http://tronixstuff.com/2011/03/16/tutorial-your-arduinos-inbuilt-eeprom/
+
 http://aprs.gids.nl/nmea/
+
 http://learn.adafruit.com/memories-of-an-arduino/optimizing-sram
+
+http://thijs.elenbaas.net/2012/07/extended-eeprom-library-for-arduino/
 
 Spherical Law of Cosines
 
