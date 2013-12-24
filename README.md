@@ -17,6 +17,8 @@ http://thijs.elenbaas.net/2012/07/extended-eeprom-library-for-arduino/
 
 http://arduiniana.org/libraries/tinygpsplus/
 
+http://www.loveelectronics.co.uk/Tutorials/8/hmc5883l-tutorial-and-arduino-library
+
 
 
 
