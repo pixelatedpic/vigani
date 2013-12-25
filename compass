@@ -35,6 +35,7 @@ float getHeading(){
   //Get the reading from the HMC5883L and calculate the heading
   MagnetometerScaled scaled = compass.ReadScaledAxis(); //scaled values from compass.
   float heading = atan2(scaled.YAxis, scaled.XAxis);
+  
 
   // Correct for when signs are reversed.
   if(heading < 0) heading += 2*PI;
